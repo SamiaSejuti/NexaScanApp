@@ -1,0 +1,32 @@
+﻿/* Style the DataTables paginate buttons */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border: 1px solid #ccc;
+    padding: 8px 16px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 4px; /* Rounded corners */
+    background-color: #f9f9f9; /* Background color */
+}
+
+    /* Style for the active paginate button */
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background-color: #007bff;
+        color: white !important;
+    }
+
+    /* Hover effect */
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: #ccc;
+    }
+
+    /* Disable button style */
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active {
+        cursor: default;
+        color: #666 !important;
+        background: transparent;
+        border: 1px solid transparent;
+        box-shadow: none;
+    }

@@ -1,0 +1,249 @@
+﻿@model FIT5032_main_project.Models.Booking
+
+@{
+    ViewBag.Title = "Schedule a Scan";
+}
+
+@if (ViewBag.BookingSuccess != null)
+{
+    <script>
+        alert("@ViewBag.BookingSuccess");
+    </script>
+}
+
+<h2>Schedule a Scan</h2>
+
+@using (Html.BeginForm("CreateBooking", "Booking", FormMethod.Post))
+{@Html.AntiForgeryToken()
+<div class="mb-2"></div>
+<div>
+    @Html.Label("Select Doctor")
+    @Html.DropDownList("DoctorId", (SelectList)ViewBag.DoctorList, "Select Doctor", new { id = "doctorDropdown", @class = "form-control" })
+</div>
+<div class="mb-2"></div>
+<div>
+    @Html.Label("Select Date")
+    @Html.DropDownList("ScheduleDate", Enumerable.Empty<SelectListItem>(), "Select Date", new { id = "scheduleDateDropdown", @class = "form-control" })
+</div>
+
+<div class="mb-2"></div>
+<div id="scheduleDiv">
+    @Html.Label("Select Timing")
+    @Html.DropDownListFor(model => model.ScheduleId, Enumerable.Empty<SelectListItem>(), "Select Timing", new { id = "scheduleDropdown", @class = "form-control" })
+</div>
+<div class="mb-2"></div>
+<div>
+    <input type="submit" value="Schedule" class="btn btn-primary" />
+</div>
+}
+<div class="mb-2"></div>
+<div class="mb-2"></div>
+<div class="mb-2"></div>
+<div>
+    <h3>My Appointment(s)</h3>
+    <button id="exportToPdf">Export to PDF</button>
+    <button id="exportToCsv">Export to CSV</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Doctor</th>
+                <th>Scheduled Day</th>
+                <th>Scheduled Time</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @if (ViewBag.Appointments != null)
+            {
+                foreach (var item in (List<FIT5032_main_project.Models.Booking>)ViewBag.Appointments)
+                {
+                    <tr>
+                        <td>@item.Schedule.Doctor.Name</td>
+                        <td>@item.Schedule.ScheduleDate.ToString("MM/dd/yyyy")</td>
+                        <td>@item.Schedule.StartTime - @item.Schedule.EndTime</td>
+                        <td>
+                            <form action="@Url.Action("Delete", "Booking")" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Schedule.ScheduleId" />
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this schedule?');">Delete</button>
+                            </form>
+                        <td>
+
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<div class="mb-2"></div>
+<head>
+    <!-- ... Other head elements ... -->
+    <link href="~/Content/fullcalendar.css" rel="stylesheet" type="text/css" />
+</head>
+
+<h2>Calendar View</h2>
+<!-- Button to open the calendar -->
+<button id="toggleCalendarButton">Toggle Calendar</button>
+
+<!-- Calendar Div -->
+<div id="calendar" style="display: none;"></div>
+
+<div style="display: none">
+    <table class="table">
+    </table>
+</div>
+
+<div id="appointments" style="display:none;">
+    @if (ViewBag.Appointments != null)
+    {
+        foreach (var item in (List<FIT5032_main_project.Models.Booking>)ViewBag.Appointments)
+        {
+            <div class="event">
+                <span class="start">@item.Schedule.ScheduleDate.ToString("yyyy-MM-dd")</span>
+                <span class="title">@item.Schedule.Doctor.Name</span>
+            </div>
+        }
+    }
+</div>
+
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
+
+    <script src="~/Scripts/lib/jquery.min.js"></script>
+    <script src="~/Scripts/lib/moment.min.js"></script>
+    <script src="~/Scripts/fullcalendar.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // Export to PDF
+            document.getElementById('exportToPdf').addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.text('My Appointments', 10, 10);
+                doc.autoTable({ html: '.table' });
+                doc.save('appointments.pdf');
+            });
+
+            // Export to CSV
+            document.getElementById('exportToCsv').addEventListener('click', function () {
+                let csv = [];
+                let rows = document.querySelectorAll("table tr");
+
+                for (let i = 0; i < rows.length; i++) {
+                    let row = [], cols = rows[i].querySelectorAll("td, th");
+
+                    for (let j = 0; j < cols.length; j++) {
+                        row.push(cols[j].innerText);
+                    }
+
+                    csv.push(row.join(","));
+                }
+
+                let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+                let downloadLink = document.createElement("a");
+                downloadLink.download = 'appointments.csv';
+                downloadLink.href = window.URL.createObjectURL(csvFile);
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+            });
+
+
+
+
+            var isCalendarInitialized = false;
+
+            $("#toggleCalendarButton").click(function () {
+                // Toggle calendar visibility
+                $("#calendar").toggle();
+
+                // Initialize FullCalendar if not already initialized
+                if (!isCalendarInitialized) {
+                    var events = [];
+                    $("#appointments .event").each(function () {
+                        var title = $(".title", this).text().trim();
+                        var start = $(".start", this).text().trim();
+                        events.push({
+                            "title": title,
+                            "start": start
+                        });
+                    });
+
+                    $('#calendar').fullCalendar({
+                        locale: 'au',
+                        events: events,
+                        dayClick: function (date, allDay, jsEvent, view) {
+                            var m = moment(date).format("YYYY-MM-DD");
+                            m = encodeURIComponent(m);
+                            var uri = "/Home/About?date=" + m;
+                            $(location).attr('href', uri);
+                        }
+                    });
+
+                    isCalendarInitialized = true;
+                }
+            });
+
+            // When the doctor is changed, populate available dates
+$("#doctorDropdown").change(function () {
+    var doctorId = $(this).val();
+    $("#dayOfWeekDropdown").empty();
+    $("#scheduleDropdown").empty();
+    $("#scheduleDateDropdown").empty(); // Empty the date dropdown too
+
+    // Use AJAX to retrieve available days for the selected doctor
+    $.get('@Url.Action("GetAvailableDays", "Booking")', { doctorId: doctorId }, function (data) {
+        $.each(data, function (index, item) {
+            $("#dayOfWeekDropdown").append($('<option></option>').val(item).html(item));
+        });
+    });
+
+    // Use AJAX to retrieve available dates for the selected doctor
+    $.get('@Url.Action("GetAvailableDates", "Booking")', { doctorId: doctorId }, function (data) {
+        $.each(data, function (index, date) {
+            $("#scheduleDateDropdown").append($('<option></option>').val(date).html(date));
+        });
+    });
+});
+
+// Existing code to handle day of the week dropdown
+$("#dayOfWeekDropdown").change(function () {
+    var selectedDay = $(this).val();
+    $("#scheduleDropdown").empty();
+
+    // Use AJAX to retrieve available timings for the selected day of the week and doctor
+    var doctorId = $("#doctorDropdown").val();
+    $.get('@Url.Action("GetAvailableTimings", "Booking")', { doctorId: doctorId, selectedDay: selectedDay })
+        .done(function (data) {
+            $.each(data, function (index, item) {
+                $("#scheduleDropdown").append($('<option></option>').val(item.ScheduleId).html(item.Time));
+            });
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            console.error("Request failed: " + textStatus + ", " + errorThrown);
+        });
+});
+
+$("#scheduleDateDropdown").change(function () {
+    var selectedDate = $(this).val();
+    $("#scheduleDropdown").empty();
+
+    // Use AJAX to retrieve available timings for the selected date and doctor
+    var doctorId = $("#doctorDropdown").val();
+    $.get('@Url.Action("GetAvailableTimings", "Booking")', { doctorId: doctorId, selectedDay: selectedDate })
+        .done(function (data) {
+            $.each(data, function (index, item) {
+                $("#scheduleDropdown").append($('<option></option>').val(item.ScheduleId).html(item.Time));
+            });
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            console.error("Request failed: " + textStatus + ", " + errorThrown);
+        });
+});
+
+    });  // <-- closing bracket for $(document).ready
+    </script>  //
+}

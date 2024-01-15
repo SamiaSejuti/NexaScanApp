@@ -1,0 +1,83 @@
+﻿@model FIT5032_main_project.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Register";
+}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+<main aria-labelledby="title">
+    <h2 id="title">@ViewBag.Title.</h2>
+
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        <h4>Create a new account.</h4>
+        <hr />
+        @Html.ValidationSummary("", new { @class = "text-danger" })
+        <div class="row">
+            @Html.LabelFor(m => m.Name, new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="row">
+            @Html.LabelFor(m => m.Email, new { @class = "col-md-2 col-form-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="row">
+            @Html.LabelFor(m => m.Password, new { @class = "col-md-2 col-form-label" })
+            <div class="col-md-10">
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="row">
+            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 col-form-label" })
+            <div class="col-md-10">
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="row">
+            @Html.LabelFor(m => m.UserRole, new { @class = "col-md-2 col-form-label" })
+            <div class="col-md-10">
+                <select class="form-control" id="UserRole" name="UserRole">
+                    <option value="Admin">Admin</option>
+                    <option value="Doctor">Doctor</option>
+                    <option value="Patient">Patient</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            @Html.LabelFor(m => m.Specialization, new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Specialization, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-2 col-md-10">
+                <input type="submit" value="Register" class="btn btn-outline-dark" />
+            </div>
+        </div>
+    }
+</main>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function () {
+            // initially hide the specialization field
+            $('.row:has(#Specialization)').hide();
+
+            // show/hide specialization field based on the selected user role
+            $('#UserRole').change(function () {
+                if ($(this).val() === 'Doctor') {
+                    $('.row:has(#Specialization)').show();
+                } else {
+                    $('.row:has(#Specialization)').hide();
+                }
+            });
+        });
+    </script>
+}
+

@@ -1,0 +1,61 @@
+﻿<link href="~/Content/Pagination.css" rel="stylesheet" />
+@model IEnumerable<FIT5032_main_project.Models.Doctor>
+
+<h2>Doctors</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Speciality</th>
+            <th>Average Rating</th>
+            <th>Rate Doctor</th>
+            <th>View Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var doctor in Model)
+        {
+            var averageRating = doctor.Ratings.Average(r => (double?)r.Score) ?? 0.0; // Compute the average rating for each doctor
+            <tr>
+                <td>@doctor.Name</td>
+                <td>@doctor.Specialization</td>
+                <td>@averageRating</td> <!-- Displaying Average Rating -->
+                <td>
+                    <!-- Rating dropdown to select rating score -->
+                    <form action="@Url.Action("RateDoctor", "Doctor")" method="post">
+                        @Html.AntiForgeryToken()
+                        <select name="ratingScore">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                        <input type="hidden" name="doctorId" value="@doctor.DoctorId" />
+                        <input type="submit" value="Rate" class="btn btn-primary" />
+                    </form>
+                <td>
+                    <a href="@Url.Action("ViewDoctorDetail", "Doctor", new { id = doctor.DoctorId })" class="btn btn-info">
+                        View
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/DataTables/jquery.dataTables.js")
+    @Scripts.Render("~/Scripts/DataTables/dataTables.bootstrap.js")
+    <script>
+        $(document).ready(function () {
+            $('.table').DataTable({
+                "pageLength": 10,
+                "pagingType": "full_numbers"
+            });
+        });
+    </script>
+}
+
+<link href="~/Content/DataTables/css/dataTables.bootstrap.min.css" rel="stylesheet" />

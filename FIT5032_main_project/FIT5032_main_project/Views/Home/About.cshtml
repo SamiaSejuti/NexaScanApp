@@ -1,0 +1,67 @@
+﻿@model FIT5032_main_project.Models.Event
+
+
+@{
+    ViewBag.Title = "About";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <!-- ... Other head elements ... -->
+    <link href="~/Content/fullcalendar.css" rel="stylesheet" type="text/css" />
+</head>
+
+<h2>About</h2>
+<!-- Button to open the calendar -->
+<button id="toggleCalendarButton">Toggle Calendar</button>
+
+<!-- Calendar Div -->
+<div id="calendar" style="display: none;"></div>
+
+<div style="display: none">
+    <table class="table">
+        @* ... your table here ... *@
+    </table>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/lib/jquery.min.js"></script>
+    <script src="~/Scripts/lib/moment.min.js"></script>
+    <script src="~/Scripts/fullcalendar.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            var isCalendarInitialized = false;
+
+            $("#toggleCalendarButton").click(function () {
+                // Toggle calendar visibility
+                $("#calendar").toggle();
+
+                // Initialize FullCalendar if not already initialized
+                if (!isCalendarInitialized) {
+                    var events = [];
+                    $(".events").each(function () {
+                        var title = $(".title", this).text().trim();
+                        var start = $(".start", this).text().trim();
+                        events.push({
+                            "title": title,
+                            "start": start
+                        });
+                    });
+
+                    $('#calendar').fullCalendar({
+                        locale: 'au',
+                        events: events,
+                        dayClick: function (date, allDay, jsEvent, view) {
+                            var m = moment(date).format("YYYY-MM-DD");
+                            m = encodeURIComponent(m);
+                            var uri = "/Home/About?date=" + m;
+                            $(location).attr('href', uri);
+                        }
+                    });
+
+                    isCalendarInitialized = true;
+                }
+            });
+        });
+    </script>
+}

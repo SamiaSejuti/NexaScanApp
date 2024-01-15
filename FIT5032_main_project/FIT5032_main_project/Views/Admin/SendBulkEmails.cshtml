@@ -1,0 +1,62 @@
+﻿@model FIT5032_main_project.Models.BulkEmailViewModel
+@{
+    ViewBag.Title = "Send Bulk Emails";
+}
+
+<h2>@ViewBag.Title.</h2>
+@{
+    if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            alert('@TempData["SuccessMessage"]');
+        </script>
+    }
+}
+
+@using (Html.BeginForm("SendBulkEmails", "Admin", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Send Bulk Emails</h4>
+        <hr />
+
+        <div class="form-group">
+            <label class="control-label col-md-2" for="Emails">Email Addresses</label>
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Emails, new { @class = "form-control", @placeholder = "Enter email addresses separated by commas" })
+                @Html.ValidationMessageFor(model => model.Emails)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2" for="Subject">Subject</label>
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.Subject, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Subject)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2" for="Message">Message</label>
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Message, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Message)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Send" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
