@@ -63,11 +63,11 @@ public class BookingController : Controller
         }
         catch (Exception ex)
         {
-            // repopulate the doctor list in ViewBag
+      
             ViewBag.DoctorList = new SelectList(db.Doctors, "DoctorId", "Name");
             ViewBag.Error = ex.Message;
 
-            // Retrieve the appointments for the logged-in patient
+         
             string applicationUserId = User.Identity.GetUserId();
             var patient = db.Patients.FirstOrDefault(p => p.ApplicationUserId == applicationUserId);
             if (patient != null)
@@ -113,7 +113,6 @@ public class BookingController : Controller
         }
         catch (Exception ex)
         {
-            // Your error handling code here
             return Json(new { error = "An error occurred while retrieving available dates." }, JsonRequestBehavior.AllowGet);
         }
     }
@@ -176,11 +175,10 @@ public class BookingController : Controller
     [Authorize(Roles = "Patient")]
     public ActionResult CreateBooking(int scheduleId)
     {
-        // Find the schedule in the database
+     
         var schedule = db.Schedules.Find(scheduleId);
         if (schedule == null)
         {
-            // Handle error - schedule not found
             ModelState.AddModelError("", "Schedule not found.");
             return View();
         }
@@ -190,7 +188,7 @@ public class BookingController : Controller
         var patient = db.Patients.FirstOrDefault(p => p.ApplicationUserId == applicationUserId);
         if (patient == null)
         {
-            // Handle error - patient not found
+   
             ModelState.AddModelError("", "Patient not found.");
             return View();
         }
@@ -209,7 +207,6 @@ public class BookingController : Controller
         db.Bookings.Add(newBooking);
         db.SaveChanges();
         TempData["BookingSuccess"] = "Booking has been successfully created!";
-        // Redirect to a success page
         return RedirectToAction("ScheduleScan", "Booking");
 
 
@@ -217,19 +214,14 @@ public class BookingController : Controller
 
     public ActionResult Appointments()
     {
-        // Get the application user ID of the currently logged in user
         string applicationUserId = User.Identity.GetUserId();
 
-        // Find the patient related to the logged in user
         var patient = db.Patients.FirstOrDefault(p => p.ApplicationUserId == applicationUserId);
         if (patient == null)
         {
-            // Handle error - patient not found
             ModelState.AddModelError("", "Patient not found.");
             return View();
         }
-
-        // Retrieve bookings related to the found patient
         var bookings = db.Bookings
                         .Include("Schedule")
                         .Include("Schedule.Doctor")
@@ -247,7 +239,6 @@ public class BookingController : Controller
         var booking = db.Bookings.FirstOrDefault(b => b.ScheduleId == id);
         if (booking != null)
         {
-            // Store schedule details before deleting the booking
             var scheduleDetails = new Schedule
             {
                 ScheduleDate = booking.BookingDate,
@@ -256,11 +247,9 @@ public class BookingController : Controller
                 DoctorId = booking.Schedule.DoctorId
             };
 
-            // Delete the booking
             db.Bookings.Remove(booking);
             db.SaveChanges();
 
-            // Add the schedule back to the available schedules
             db.Schedules.Add(scheduleDetails);
             try
             {
@@ -288,7 +277,6 @@ public class BookingController : Controller
             ViewBag.BookingError = "Booking not found.";
         }
 
-        // Redirect back to the ScheduleScan view.
         return RedirectToAction("ScheduleScan");
     }
 
