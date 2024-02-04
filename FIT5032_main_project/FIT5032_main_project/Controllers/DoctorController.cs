@@ -27,8 +27,6 @@ namespace FIT5032_main_project.Controllers
         public ActionResult RateDoctor(int doctorId, int ratingScore)
         {
             var userId = User.Identity.GetUserId();
-
-            // Check if the user already rated this doctor
             var existingRating = db.Ratings.FirstOrDefault(r => r.DoctorId == doctorId && r.PatientId == userId);
 
             if (existingRating != null)
