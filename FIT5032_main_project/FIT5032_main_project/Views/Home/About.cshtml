@@ -6,12 +6,10 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <head>
-    <!-- ... Other head elements ... -->
     <link href="~/Content/fullcalendar.css" rel="stylesheet" type="text/css" />
 </head>
 
 <h2>About</h2>
-<!-- Button to open the calendar -->
 <button id="toggleCalendarButton">Toggle Calendar</button>
 
 <!-- Calendar Div -->
@@ -33,10 +31,7 @@
             var isCalendarInitialized = false;
 
             $("#toggleCalendarButton").click(function () {
-                // Toggle calendar visibility
                 $("#calendar").toggle();
-
-                // Initialize FullCalendar if not already initialized
                 if (!isCalendarInitialized) {
                     var events = [];
                     $(".events").each(function () {
