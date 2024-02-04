@@ -74,8 +74,6 @@ namespace FIT5032_main_project.Controllers
                 return View(model);
             }
 
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, change to shouldLockout: true
             var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
             switch (result)
             {
@@ -117,10 +115,7 @@ namespace FIT5032_main_project.Controllers
                 return View(model);
             }
 
-            // The following code protects for brute force attacks against the two factor codes. 
-            // If a user enters incorrect codes for a specified amount of time then the user account 
-            // will be locked out for a specified amount of time. 
-            // You can configure the account lockout settings in IdentityConfig
+          
             var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent:  model.RememberMe, rememberBrowser: model.RememberBrowser);
             switch (result)
             {
@@ -160,7 +155,7 @@ namespace FIT5032_main_project.Controllers
                 if (result.Succeeded)
 
                 {
-                    // Assign the role to the user
+               
                     await UserManager.AddToRoleAsync(user.Id, model.UserRole);
 
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
@@ -178,7 +173,7 @@ namespace FIT5032_main_project.Controllers
                     }
                     else if (model.UserRole == "Admin")
                     {
-                        // Handle Admin registration, e.g., add Admin entity to Admins table
+                   
                         var admin = new Admin
                         {
                             ApplicationUserId = user.Id,
@@ -190,7 +185,7 @@ namespace FIT5032_main_project.Controllers
                     }
                     else if (model.UserRole == "Patient")
                     {
-                        // Handle Patient registration, e.g., add Patient entity to Patients table
+             
                         var patient = new Patient
                         {
                             ApplicationUserId = user.Id,
@@ -200,12 +195,7 @@ namespace FIT5032_main_project.Controllers
                         db.Patients.Add(patient);
                         await db.SaveChangesAsync();
                     }
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                    // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
+                   
                     return RedirectToAction("Index", "Home");
                 }
                 AddErrors(result);
@@ -252,20 +242,14 @@ namespace FIT5032_main_project.Controllers
                     return View("ForgotPasswordConfirmation");
                 }
 
-                // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                // Send an email with this link
-                // string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-                // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
-                // await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
-                // return RedirectToAction("ForgotPasswordConfirmation", "Account");
+                
             }
 
             // If we got this far, something failed, redisplay form
             return View(model);
         }
 
-        //
-        // GET: /Account/ForgotPasswordConfirmation
+        
         [AllowAnonymous]
         public ActionResult ForgotPasswordConfirmation()
         {
@@ -294,7 +278,7 @@ namespace FIT5032_main_project.Controllers
             var user = await UserManager.FindByNameAsync(model.Email);
             if (user == null)
             {
-                // Don't reveal that the user does not exist
+  
                 return RedirectToAction("ResetPasswordConfirmation", "Account");
             }
             var result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
@@ -306,8 +290,7 @@ namespace FIT5032_main_project.Controllers
             return View();
         }
 
-        //
-        // GET: /Account/ResetPasswordConfirmation
+       
         [AllowAnonymous]
         public ActionResult ResetPasswordConfirmation()
         {
@@ -467,7 +450,7 @@ namespace FIT5032_main_project.Controllers
         }
 
         #region Helpers
-        // Used for XSRF protection when adding external logins
+      
         private const string XsrfKey = "XsrfId";
 
         private IAuthenticationManager AuthenticationManager
