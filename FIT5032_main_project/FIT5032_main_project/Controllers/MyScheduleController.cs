@@ -16,11 +16,8 @@ public class MyScheduleController : Controller
     public ActionResult MySchedule()
     {
         ViewBag.Message = "Your time scheduling page.";
-
-        // Get the logged in user id
         string applicationUserId = User.Identity.GetUserId();
 
-        // Find the Doctor entity for the current user
         var doctor = db.Doctors.FirstOrDefault(d => d.ApplicationUserId == applicationUserId);
 
         if (doctor == null)
@@ -28,14 +25,7 @@ public class MyScheduleController : Controller
             return HttpNotFound("Doctor not found.");
         }
 
-        // Retrieve the schedules for the doctor
         var schedules = db.Schedules.Where(s => s.DoctorId == doctor.DoctorId).ToList();
-        //if (schedules.Count == 0)
-        //{
-        // If the doctor doesn't have a schedule, create a default schedule.
-        //schedules = CreateDefaultSchedule(doctor.DoctorId);
-        //}
-        // Pass the schedules as a model to the view
         return View(schedules);
     }
 
@@ -54,17 +44,13 @@ public class MyScheduleController : Controller
     {
         try
         {
-            // Getting the current user ID and assigning it to DoctorId
             string applicationUserId = User.Identity.GetUserId();
             var doctor = db.Doctors.FirstOrDefault(d => d.ApplicationUserId == applicationUserId);
-
-            // Check if doctor exists
             if (doctor == null)
             {
                 throw new Exception("Doctor not found.");
             }
 
-            // Assign the DoctorId to the schedule
             schedule.DoctorId = doctor.DoctorId;
 
             if (schedule.StartTime == default(TimeSpan) || schedule.EndTime == default(TimeSpan))
@@ -73,7 +59,6 @@ public class MyScheduleController : Controller
                 return View(schedule);
             }
 
-            // Manually check for null or invalid values in Schedule properties
             if (schedule.ScheduleDate == null || schedule.StartTime == null || schedule.EndTime == null)
             {
                 throw new Exception("Invalid schedule details.");
@@ -85,7 +70,6 @@ public class MyScheduleController : Controller
                 return View(schedule);
             }
 
-            // Calculate the end time
             var startHour = schedule.StartTime.Hours;
             var endHour = startHour + 1;
             if (endHour > 23)
@@ -93,10 +77,8 @@ public class MyScheduleController : Controller
                 endHour = 0;
             }
 
-            // Set the end time in the schedule
             schedule.EndTime = new TimeSpan(endHour, schedule.StartTime.Minutes, 0);
 
-            // Check for time clashes with existing schedules for the same day
             var existingSchedules = db.Schedules
                 .Where(s => s.DoctorId == doctor.DoctorId && s.ScheduleDate == schedule.ScheduleDate)
                 .ToList();
@@ -110,7 +92,6 @@ public class MyScheduleController : Controller
                 }
             }
 
-            // If everything is fine, add and save changes
             db.Schedules.Add(schedule);
             db.SaveChanges();
             return RedirectToAction("MySchedule", "MySchedule");
@@ -122,7 +103,6 @@ public class MyScheduleController : Controller
         }
     }
 
-    // Function to check if two time ranges overlap
     private bool IsTimeRangeOverlap(TimeSpan startTime1, TimeSpan endTime1, TimeSpan startTime2, TimeSpan endTime2)
     {
         return (startTime1 < endTime2 && startTime2 < endTime1);
@@ -162,7 +142,6 @@ public class MyScheduleController : Controller
         db.Schedules.Add(defaultSchedule);
         db.SaveChanges();
 
-        // Returning the new schedule as a list
         return new List<Schedule> { defaultSchedule };
     }
 
@@ -215,7 +194,6 @@ public class MyScheduleController : Controller
                 throw new Exception("Schedule not found.");
             }
 
-            // Check for time clashes with existing schedules for the same day
             var existingSchedules = db.Schedules
                 .Where(s => s.DoctorId == doctor.DoctorId && s.ScheduleDate == schedule.ScheduleDate && s.ScheduleId != schedule.ScheduleId)
                 .ToList();
@@ -267,17 +245,15 @@ public class MyScheduleController : Controller
             db.Schedules.Remove(schedule);
             db.SaveChanges();
 
-            // Check if there are no schedules left for the doctor.
             if (!db.Schedules.Any(s => s.DoctorId == doctorId))
             {
                 var doctor = db.Doctors.Find(doctorId);
-                // If the flag is false, add a default schedule.
                 if (!doctor.IsDefaultScheduleAdded)
                 {
                     DateTime defaultDate = DateTime.Today.AddDays(1); // Default to tomorrow
                     var defaultSchedule = new Schedule
                     {
-                        // Set the default values here.
+                   
                         DoctorId = doctorId,
                         ScheduleDate = defaultDate,
                         StartTime = new TimeSpan(9, 0, 0),
@@ -286,7 +262,7 @@ public class MyScheduleController : Controller
                     db.Schedules.Add(defaultSchedule);
                     db.SaveChanges();
 
-                    // Set the flag to true.
+           
                     doctor.IsDefaultScheduleAdded = true;
                     db.Entry(doctor).State = EntityState.Modified;
                     db.SaveChanges();
