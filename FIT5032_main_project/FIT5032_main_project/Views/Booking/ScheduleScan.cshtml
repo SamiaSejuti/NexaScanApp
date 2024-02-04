@@ -77,7 +77,6 @@
 </div>
 <div class="mb-2"></div>
 <head>
-    <!-- ... Other head elements ... -->
     <link href="~/Content/fullcalendar.css" rel="stylesheet" type="text/css" />
 </head>
 
@@ -118,7 +117,6 @@
     <script>
         $(document).ready(function () {
 
-            // Export to PDF
             document.getElementById('exportToPdf').addEventListener('click', () => {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
@@ -127,7 +125,6 @@
                 doc.save('appointments.pdf');
             });
 
-            // Export to CSV
             document.getElementById('exportToCsv').addEventListener('click', function () {
                 let csv = [];
                 let rows = document.querySelectorAll("table tr");
@@ -157,10 +154,9 @@
             var isCalendarInitialized = false;
 
             $("#toggleCalendarButton").click(function () {
-                // Toggle calendar visibility
                 $("#calendar").toggle();
 
-                // Initialize FullCalendar if not already initialized
+               
                 if (!isCalendarInitialized) {
                     var events = [];
                     $("#appointments .event").each(function () {
@@ -187,21 +183,21 @@
                 }
             });
 
-            // When the doctor is changed, populate available dates
+           
 $("#doctorDropdown").change(function () {
     var doctorId = $(this).val();
     $("#dayOfWeekDropdown").empty();
     $("#scheduleDropdown").empty();
     $("#scheduleDateDropdown").empty(); // Empty the date dropdown too
 
-    // Use AJAX to retrieve available days for the selected doctor
+   
     $.get('@Url.Action("GetAvailableDays", "Booking")', { doctorId: doctorId }, function (data) {
         $.each(data, function (index, item) {
             $("#dayOfWeekDropdown").append($('<option></option>').val(item).html(item));
         });
     });
 
-    // Use AJAX to retrieve available dates for the selected doctor
+   
     $.get('@Url.Action("GetAvailableDates", "Booking")', { doctorId: doctorId }, function (data) {
         $.each(data, function (index, date) {
             $("#scheduleDateDropdown").append($('<option></option>').val(date).html(date));
@@ -209,12 +205,10 @@ $("#doctorDropdown").change(function () {
     });
 });
 
-// Existing code to handle day of the week dropdown
 $("#dayOfWeekDropdown").change(function () {
     var selectedDay = $(this).val();
     $("#scheduleDropdown").empty();
 
-    // Use AJAX to retrieve available timings for the selected day of the week and doctor
     var doctorId = $("#doctorDropdown").val();
     $.get('@Url.Action("GetAvailableTimings", "Booking")', { doctorId: doctorId, selectedDay: selectedDay })
         .done(function (data) {
@@ -231,7 +225,7 @@ $("#scheduleDateDropdown").change(function () {
     var selectedDate = $(this).val();
     $("#scheduleDropdown").empty();
 
-    // Use AJAX to retrieve available timings for the selected date and doctor
+    
     var doctorId = $("#doctorDropdown").val();
     $.get('@Url.Action("GetAvailableTimings", "Booking")', { doctorId: doctorId, selectedDay: selectedDate })
         .done(function (data) {
@@ -244,6 +238,6 @@ $("#scheduleDateDropdown").change(function () {
         });
 });
 
-    });  // <-- closing bracket for $(document).ready
+    });  
     </script>  //
 }
